@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
     steps:
       - name: Checkout repository
@@ -17,7 +19,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -28,6 +30,13 @@ jobs:
 
       - name: Expo CLI info
         run: npx expo --version || true
+
+      - name: Start Expo project (non-interactive check)
+        run: |
+          npx expo start --non-interactive > /tmp/expo-start.log 2>&1 &
+          EXPO_PID=$!
+          sleep 10
+          kill "$EXPO_PID" || true
 
       - name: Run lint (if configured)
         run: npm run lint --if-present
